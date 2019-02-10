@@ -87,7 +87,7 @@ public class StackAdvisorHelper {
     // TODO, need frontend to pass the Service Name that was modified.
     // For now, hardcode.
     // Once fixed, change StackAdvisorHelperTest.java to use the actual service name.
-    String serviceName = "ZOOKEEPER";
+    String serviceName = "AMBARI_METRICS";
     ServiceInfo.ServiceAdvisorType serviceAdvisorType = getServiceAdvisorType(request.getStackName(), request.getStackVersion(), serviceName);
     StackAdvisorCommand<ValidationResponse> command = createValidationCommand(serviceName, request);
 
@@ -127,7 +127,7 @@ public class StackAdvisorHelper {
 
     // TODO, need to pass the service Name that was modified.
     // For now, hardcode
-    String serviceName = "ZOOKEEPER";
+    String serviceName = "AMBARI_METRICS";
 
     ServiceInfo.ServiceAdvisorType serviceAdvisorType = getServiceAdvisorType(request.getStackName(), request.getStackVersion(), serviceName);
     StackAdvisorCommand<RecommendationResponse> command = createRecommendationCommand(serviceName, request);
