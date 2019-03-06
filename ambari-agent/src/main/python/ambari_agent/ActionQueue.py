@@ -143,6 +143,8 @@ class ActionQueue(threading.Thread):
       self.customServiceOrchestrator.cancel_command(task_id, reason)
 
   def run(self):
+    import ctypes
+    logger.debug("!!!ThreadID: {}".format(ctypes.cdll.LoadLibrary('libc.so.6').syscall(186)))
     while not self.stopped():
       try:
         self.processBackgroundQueueSafeEmpty()

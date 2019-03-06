@@ -116,6 +116,8 @@ class DataCleaner(threading.Thread):
         pass
 
   def run(self):
+    import ctypes
+    logger.debug("!!!ThreadID: {}".format(ctypes.cdll.LoadLibrary('libc.so.6').syscall(186)))
     while not self.stopped:
       logger.info('Data cleanup started')
       self.cleanup()

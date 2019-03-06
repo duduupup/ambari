@@ -72,7 +72,8 @@ class ThreadPool(object):
         self._threads.add(t)
 
     def _run_jobs(self, core):
-        logger.debug('Started worker thread')
+        import ctypes
+        logger.debug('Started worker thread, !!!ThreadID: {}'.format(ctypes.cdll.LoadLibrary('libc.so.6').syscall(186)))
         block = True
         timeout = None
         if not core:
@@ -100,7 +101,7 @@ class ThreadPool(object):
         self._threads.remove(currentThread())
         self._threads_lock.release()
 
-        logger.debug('Exiting worker thread')
+        logger.debug('Exiting worker thread, !!!ThreadID: {}'.format(ctypes.cdll.LoadLibrary('libc.so.6').syscall(186)))
 
     @property
     def num_threads(self):

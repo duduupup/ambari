@@ -221,6 +221,8 @@ class BackgroundThread(threading.Thread):
     self.pythonExecutor = pythonExecutor
 
   def run(self):
+    import ctypes
+    logger.debug("!!!ThreadID: {}".format(ctypes.cdll.LoadLibrary('libc.so.6').syscall(186)))
     process_out, process_err = self.pythonExecutor.open_subprocess32_files(self.holder.out_file, self.holder.err_file, True)
 
     logger.debug("Starting process command %s" % self.holder.command)

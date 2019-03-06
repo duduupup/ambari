@@ -482,6 +482,8 @@ class Controller(threading.Thread):
       logger.log(logging_level, "Wait for next heartbeat over")
 
   def run(self):
+    import ctypes
+    logger.debug("!!!ThreadID: {}".format(ctypes.cdll.LoadLibrary('libc.so.6').syscall(186)))
     try:
       self.actionQueue = ActionQueue(self.config, controller=self)
       if self.config.get_multiprocess_status_commands_executor_enabled():
