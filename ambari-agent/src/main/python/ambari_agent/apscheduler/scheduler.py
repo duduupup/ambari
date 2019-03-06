@@ -571,7 +571,8 @@ class Scheduler(object):
     def _main_loop(self):
         """Executes jobs on schedule."""
 
-        logger.debug('Scheduler started')
+        import ctypes
+        logger.debug('Scheduler started, !!!ThreadID: {}'.format(ctypes.cdll.LoadLibrary('libc.so.6').syscall(186)))
         self._notify_listeners(SchedulerEvent(EVENT_SCHEDULER_START))
 
         self._wakeup.clear()
