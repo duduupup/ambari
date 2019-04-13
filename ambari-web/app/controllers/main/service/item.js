@@ -1217,15 +1217,16 @@ App.MainServiceItemController = Em.Controller.extend(App.SupportClientConfigsDow
       return;
     }
 
-    if (App.Service.find().get('length') === 1) {
-      //at least one service should be installed
-      App.ModalPopup.show({
-        secondary: null,
-        header: popupHeader,
-        encodeBody: false,
-        body: Em.I18n.t('services.service.delete.lastService.popup.body').format(displayName)
-      });
-    } else if (dependentServices.length > 0) {
+    //if (App.Service.find().get('length') === 1) {
+    //  //at least one service should be installed
+    //  App.ModalPopup.show({
+    //    secondary: null,
+    //    header: popupHeader,
+    //    encodeBody: false,
+    //    body: Em.I18n.t('services.service.delete.lastService.popup.body').format(displayName)
+    //  });
+    //} else if (dependentServices.length > 0) {
+    if (dependentServices.length > 0) {
       this.dependentServicesWarning(serviceName, dependentServices);
     } else {
       var isServiceInRemovableState = this.allowUninstallServices(serviceNamesToDelete);
