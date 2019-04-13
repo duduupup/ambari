@@ -31,7 +31,7 @@ limitations under the License.
   <packaging>jar</packaging>
   <properties>
     <sinkJarName>${project.artifactId}-with-common-${project.version}.jar</sinkJarName>
-    <hadoop.version>2.7.3.2.6.4.0-91</hadoop.version>
+    <hadoop.version>2.7.3.2.6.5.0-292</hadoop.version>
   </properties>
 
 

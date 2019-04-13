@@ -83,6 +83,7 @@ import java.util.concurrent.TimeUnit;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.hadoop.yarn.server.applicationhistoryservice.metrics.timeline.TimelineMetricConfiguration.AGGREGATE_TABLE_SPLIT_POINTS;
 import static org.apache.hadoop.yarn.server.applicationhistoryservice.metrics.timeline.TimelineMetricConfiguration.TIMELINE_METRICS_AGGREGATE_TABLE_HBASE_BLOCKING_STORE_FILES;
+import static org.apache.hadoop.yarn.server.applicationhistoryservice.metrics.timeline.TimelineMetricConfiguration.TIMELINE_METRICS_EVENT_METRIC_PATTERNS;
 import static org.apache.hadoop.yarn.server.applicationhistoryservice.metrics.timeline.TimelineMetricConfiguration.TIMELINE_METRICS_HBASE_AGGREGATE_TABLE_COMPACTION_POLICY_CLASS;
 import static org.apache.hadoop.yarn.server.applicationhistoryservice.metrics.timeline.TimelineMetricConfiguration.TIMELINE_METRICS_HBASE_AGGREGATE_TABLE_COMPACTION_POLICY_KEY;
 import static org.apache.hadoop.yarn.server.applicationhistoryservice.metrics.timeline.TimelineMetricConfiguration.TIMELINE_METRICS_HBASE_PRECISION_TABLE_COMPACTION_POLICY_CLASS;
@@ -183,6 +184,7 @@ public class PhoenixHBaseAccessor {
   private final boolean skipBlockCacheForAggregatorsEnabled;
   private final String timelineMetricsTablesDurability;
   private final String timelineMetricsPrecisionTableDurability;
+  private Set<String> eventMetricPatterns = new HashSet<>();
 
   static final String HSTORE_COMPACTION_CLASS_KEY =
     "hbase.hstore.defaultengine.compactionpolicy.class";
@@ -226,6 +228,12 @@ public class PhoenixHBaseAccessor {
     this.skipBlockCacheForAggregatorsEnabled = metricsConf.getBoolean(AGGREGATORS_SKIP_BLOCK_CACHE, false);
     this.timelineMetricsTablesDurability = metricsConf.get(TIMELINE_METRICS_AGGREGATE_TABLES_DURABILITY, "");
     this.timelineMetricsPrecisionTableDurability = metricsConf.get(TIMELINE_METRICS_PRECISION_TABLE_DURABILITY, "");
+
+    String eventMetricPatternStrings = metricsConf.get(TIMELINE_METRICS_EVENT_METRIC_PATTERNS, StringUtils.EMPTY);
+    for (String patternString : eventMetricPatternStrings.split(",")) {
+      String javaPatternString = getJavaRegexFromSqlRegex(patternString);
+      eventMetricPatterns.add(javaPatternString);
+    }
 
     tableTTL.put(METRICS_RECORD_TABLE_NAME, metricsConf.get(PRECISION_TABLE_TTL, String.valueOf(1 * 86400)));  // 1 day
     tableTTL.put(CONTAINER_METRICS_TABLE_NAME, metricsConf.get(CONTAINER_METRICS_TTL, String.valueOf(30 * 86400)));  // 30 days
@@ -933,10 +941,10 @@ public class PhoenixHBaseAccessor {
         }
         for (Function f : functions) {
           if (f.getReadFunction() == Function.ReadFunction.VALUE) {
-            getTimelineMetricsFromResultSet(metrics, f, condition, rs);
+            getTimelineMetricsFromResultSet(metrics, f, condition, rs, isEventDownsampledMetric(metricName));
           } else {
             SingleValuedTimelineMetric metric =
-              TIMELINE_METRIC_READ_HELPER.getAggregatedTimelineMetricFromResultSet(rs, f);
+              TIMELINE_METRIC_READ_HELPER.getAggregatedTimelineMetricFromResultSet(rs, f, isEventDownsampledMetric(metricName));
 
             if (condition.isGrouped()) {
               metrics.addOrMergeTimelineMetric(metric);
@@ -948,12 +956,21 @@ public class PhoenixHBaseAccessor {
       } else {
         // No aggregation requested
         // Execution never goes here, function always contain at least 1 element
-        getTimelineMetricsFromResultSet(metrics, null, condition, rs);
+        getTimelineMetricsFromResultSet(metrics, null, condition, rs, isEventDownsampledMetric(metricName));
       }
     }
   }
 
-  private void getTimelineMetricsFromResultSet(TimelineMetrics metrics, Function f, Condition condition, ResultSet rs) throws SQLException, IOException {
+  private boolean isEventDownsampledMetric(String metricName) {
+    for (String pattern : eventMetricPatterns) {
+      if (metricName.matches(pattern)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private void getTimelineMetricsFromResultSet(TimelineMetrics metrics, Function f, Condition condition, ResultSet rs, boolean shouldSumAcrossTime) throws SQLException, IOException {
     if (condition.getPrecision().equals(Precision.SECONDS)) {
       TimelineMetric metric = TIMELINE_METRIC_READ_HELPER.getTimelineMetricFromResultSet(rs);
       if (f != null && f.getSuffix() != null) { //Case : Requesting "._rate" for precision data
@@ -967,7 +984,7 @@ public class PhoenixHBaseAccessor {
 
     } else {
       SingleValuedTimelineMetric metric =
-        TIMELINE_METRIC_READ_HELPER.getAggregatedTimelineMetricFromResultSet(rs, f);
+        TIMELINE_METRIC_READ_HELPER.getAggregatedTimelineMetricFromResultSet(rs, f, shouldSumAcrossTime);
       if (condition.isGrouped()) {
         metrics.addOrMergeTimelineMetric(metric);
       } else {

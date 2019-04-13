@@ -47,7 +47,7 @@ public class TimelineMetricReadHelper {
   }
 
   public SingleValuedTimelineMetric getAggregatedTimelineMetricFromResultSet(ResultSet rs,
-      Function f) throws SQLException, IOException {
+      Function f, boolean shouldSumMetricAcrossTime) throws SQLException, IOException {
 
     Function function = (f != null) ? f : Function.DEFAULT_VALUE_FUNCTION;
     SingleValuedTimelineMetric metric = new SingleValuedTimelineMetric(
@@ -73,6 +73,9 @@ public class TimelineMetricReadHelper {
         break;
       case SUM:
         value = rs.getDouble("METRIC_SUM");
+        if (!shouldSumMetricAcrossTime) {
+          value = value / rs.getInt("METRIC_COUNT");
+        }
         break;
       default:
         value = rs.getDouble("METRIC_SUM") / rs.getInt("METRIC_COUNT");
