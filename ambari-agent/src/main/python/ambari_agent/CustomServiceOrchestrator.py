@@ -499,7 +499,6 @@ class CustomServiceOrchestrator():
     if not os.path.isfile(hook_script_path):
       logger.debug("Hook script {0} not found, skipping".format(hook_script_path))
       return None
-    logger.debug("Hook script {0} found".format(hook_script_path))
     return hook_script_path, hook_base_dir
 
 

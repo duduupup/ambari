@@ -212,11 +212,11 @@ case "${1:-}" in
         echo "Starting ambari-agent"
 
         if [ "${AMBARI_AGENT_RUN_IN_FOREGROUND:-}" == true ] ; then
-          $PYTHON $AMBARI_AGENT_PY_SCRIPT "$@" --verbose > $OUTFILE 2>&1
+          $PYTHON $AMBARI_AGENT_PY_SCRIPT "$@" > $OUTFILE 2>&1
           exit $?
         fi
 
-        nohup $PYTHON $AMBARI_AGENT_PY_SCRIPT "$@" --verbose > $OUTFILE 2>&1 &
+        nohup $PYTHON $AMBARI_AGENT_PY_SCRIPT "$@" > $OUTFILE 2>&1 &
 
         sleep 2
         PID=$!

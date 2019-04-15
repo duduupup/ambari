@@ -467,8 +467,6 @@ def main(heartbeat_stop_callback=None):
   return active_server
 
 if __name__ == "__main__":
-  #import pydevd
-  #pydevd.settrace('168.2.237.163', port=6666, stdoutToServer=True, stderrToServer=True)
   is_logger_setup = False
   try:
     heartbeat_stop_callback = bind_signal_handlers(agentPid)
