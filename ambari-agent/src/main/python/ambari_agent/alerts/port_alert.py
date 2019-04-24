@@ -173,7 +173,8 @@ class PortAlert(BaseAlert):
 
         return (result, [seconds, port])
       except Exception as e:
-        exceptions.append(e)
+        logger.warning(str(e))
+        exceptions.append('test {}:{} failed'.format(host, port))
       finally:
         if s is not None:
           try:
