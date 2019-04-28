@@ -1,0 +1,81 @@
+{
+  "XINSIGHT": {
+    "stack_features": [
+      {
+        "name": "lzo",
+        "description": "LZO libraries support",
+        "min_version": "2.0.0.0"
+      },
+      {
+        "name": "express_upgrade",
+        "description": "Express upgrade support",
+        "min_version": "2.0.0.0"
+      },
+      {
+        "name": "rolling_upgrade",
+        "description": "Rolling upgrade support",
+        "min_version": "2.0.0.0"
+      },
+      {
+        "name": "secure_zookeeper",
+        "description": "Protect ZNodes with SASL acl in secure clusters",
+        "min_version": "2.0.0.0"
+      },
+      {
+        "name": "config_versioning",
+        "description": "Configurable versions support",
+        "min_version": "2.0.0.0"
+      },
+      {
+        "name": "nfs",
+        "description": "NFS support",
+        "min_version": "2.0.0.0"
+      },
+      {
+        "name": "timeline_state_store",
+        "description": "Yarn application timeline-service supports state store property (AMBARI-11442)",
+        "min_version": "2.0.0.0"
+      },
+      {
+        "name": "hbase_home_directory",
+        "description": "Hbase home directory in HDFS needed for HBASE backup",
+        "min_version": "2.5.0.0"
+      },
+      {
+        "name": "nifi_encrypt_config",
+        "description": "Encrypt sensitive properties written to nifi property file",
+        "min_version": "2.6.0.0"
+      },
+      {
+        "name": "toolkit_config_update",
+        "description": "Support separate input and output for toolkit configuration",
+        "min_version": "2.6.0.0"
+      },
+      {
+        "name": "admin_toolkit_support",
+        "description": "Supports the nifi admin toolkit",
+        "min_version": "2.6.0.0"
+      },
+      {
+        "name": "tls_toolkit_san",
+        "description": "Support subject alternative name flag",
+        "min_version": "2.6.0.0"
+      },
+      {
+        "name": "nifi_jaas_conf_create",
+        "description": "Create NIFI jaas configuration when kerberos is enabled",
+        "min_version": "2.6.0.0"
+      },
+      {
+        "name": "registry_remove_rootpath",
+        "description": "Registry remove root path setting",
+        "min_version": "2.6.3.0"
+      },
+      {
+        "name": "nifi_encrypted_authorizers_config",
+        "description": "Support encrypted authorizers.xml configuration for version 3.1 onwards",
+        "min_version": "2.6.5.0"
+      }
+    ]
+  }
+}

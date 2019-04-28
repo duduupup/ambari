@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<configuration support_final="true">
+
+    <property>
+        <name>cdh_zookeeper_server</name>
+        <description>cdh zookeeper server</description>
+        <display-name>cdh.zookeeper.server</display-name>
+        <value>{{cdh_zookeeper_server}}</value>
+    </property>
+
+    <property>
+        <name>cdh_zookeeper_client_port</name>
+        <description>cdh zookeeper client port in cdh</description>
+        <display-name>cdh.zookeeper.client.port</display-name>
+        <value>{{cdh_zookeeper_client_port}}</value>
+    </property>
+
+    <property>
+        <name>cdh_hdfs_default_fs</name>
+        <description>cdh hdfs defaultFs</description>
+        <display-name>cdh.hdfs.default.fs</display-name>
+        <value>{{cdh_hdfs_default_fs}}</value>
+    </property>
+
+    <property>
+        <name>cdh_yarn_rm_webapp_address</name>
+        <description>cdh yarn resource manager webapp address</description>
+        <display-name>cdh.yarn.rm.webapp.address</display-name>
+        <value>{{cdh_yarn_rm_webapp_address}}</value>
+    </property>
+
+    <property>
+        <name>cdh_yarn_rm_webapp_https_address</name>
+        <description>cdh yarn resource manager webapp https address</description>
+        <display-name>cdh.yarn.rm.webapp.https.address</display-name>
+        <value>{{cdh_yarn_rm_webapp_https_address}}</value>
+    </property>
+
+    <property>
+        <name>cdh_impala_daemon_server</name>
+        <description>cdh impala daemon server</description>
+        <display-name>cdh.impala.daemon.server</display-name>
+        <value>{{cdh_impala_daemon_server}}</value>
+    </property>
+
+    <property>
+        <name>cdh_impala_daemon_hs2_port</name>
+        <description>cdh impala daemon hiveServer2 port</description>
+        <display-name>cdh.impala.daemon.hs2.port</display-name>
+        <value>{{cdh_impala_daemon_hs2_port}}</value>
+    </property>
+
+    <property>
+        <name>cdh_kudu_master</name>
+        <description>cdh kudu master</description>
+        <display-name>cdh.kudu.master</display-name>
+        <value>{{cdh_kudu_master}}</value>
+    </property>
+
+    <property>
+        <name>cdh_kudu_master_rpc_port</name>
+        <description>cdh kudu master rpc port</description>
+        <display-name>cdh.kudu.master.rpc.port</display-name>
+        <value>{{cdh_kudu_master_rpc_port}}</value>
+    </property>
+
+</configuration>

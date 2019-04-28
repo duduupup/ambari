@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<reposinfo>
+  <latest>http://127.0.0.1/xinsight/xinsight_urlinfo.json</latest>
+  <os family="redhat7">
+    <repo>
+      <baseurl>http://127.0.0.1/ambari</baseurl>
+      <repoid>XINSIGHT-2.0</repoid>
+      <reponame>XINSIGHT</reponame>
+      <unique>true</unique>
+    </repo>
+  </os>
+</reposinfo>

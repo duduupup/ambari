@@ -1,0 +1,12 @@
+{
+  "XINSIGHT": {
+    "stack-select": {
+    },
+    "conf-select": {
+    },
+    "conf-select-patching": {
+    },
+    "upgrade-dependencies" : {
+    }
+  }
+}
