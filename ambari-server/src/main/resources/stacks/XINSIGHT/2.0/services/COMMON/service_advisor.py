@@ -333,10 +333,7 @@ class XINSIGHT20COMMONServiceAdvisor(service_advisor.ServiceAdvisor):
         self.as_super.__init__(*args, **kwargs)
 
         # Always call these methods
-        Logger.info('!!!!!!args: ')
-        Logger.info(args)
-        Logger.info('!!!!!!args: ')
-        Logger.info(kwargs)
+        Logger.info('!!!!!!init: ')
 
     """
     If any components of the service should be colocated with other services,
@@ -353,8 +350,8 @@ class XINSIGHT20COMMONServiceAdvisor(service_advisor.ServiceAdvisor):
           hostComponents.remove({"name": "HAWQSEGMENT"})
     """
     def colocateService(self, hostsComponentsMap, serviceComponents):
-        Logger.info('!!!!!!hostsComponentsMap: ' + hostsComponentsMap)
-        Logger.info('!!!!!!hostsComponentsMap: ' + serviceComponents)
+        Logger.info('!!!!!!colocateService: hostsComponentsMap[{}], serviceComponents[{}]'.format(
+            type(hostsComponentsMap), type(serviceComponents)))
 
     """
     Any configuration recommendations for the service should be defined in this function.
@@ -362,10 +359,9 @@ class XINSIGHT20COMMONServiceAdvisor(service_advisor.ServiceAdvisor):
     such as recommendYARNConfigurations().
     """
     def getServiceConfigurationRecommendations(self, configurations, clusterSummary, services, hosts):
-        Logger.info('!!!!!!configurations: ' + configurations)
-        Logger.info('!!!!!!clusterSummary: ' + clusterSummary)
-        Logger.info('!!!!!!services: ' + services)
-        Logger.info('!!!!!!hosts: ' + hosts)
+        Logger.info(
+            '!!!!!!getServiceConfigurationRecommendations: configurations[{}], clusterSummary[{}], services[{}], hosts[{}]'.format(
+                type(configurations), type(clusterSummary), type(services), type(hosts)))
 
     """
     Returns an array of Validation objects about issues with the hostnames to which components are assigned.
@@ -373,8 +369,9 @@ class XINSIGHT20COMMONServiceAdvisor(service_advisor.ServiceAdvisor):
     The default validations are in stack_advisor.py getComponentLayoutValidations function.
     """
     def getServiceComponentLayoutValidations(self, services, hosts):
-        Logger.info('!!!!!!services: ' + services)
-        Logger.info('!!!!!!hosts: ' + hosts)
+        Logger.info('!!!!!!getServiceComponentLayoutValidations: services[{}], hosts[{}]'.format(
+            type(services), type(hosts)
+        ))
         return []
 
     """
@@ -383,10 +380,8 @@ class XINSIGHT20COMMONServiceAdvisor(service_advisor.ServiceAdvisor):
     such as validateHDFSConfigurations.
     """
     def getServiceConfigurationsValidationItems(self, configurations, recommendedDefaults, services, hosts):
-        Logger.info('!!!!!!configurations: ' + configurations)
-        Logger.info('!!!!!!recommendedDefaults: ' + recommendedDefaults)
-        Logger.info('!!!!!!services: ' + services)
-        Logger.info('!!!!!!hosts: ' + hosts)
+        Logger.info('!!!!!!getServiceConfigurationsValidationItemsconfigurations[{}], recommendedDefaults[{}], services[{}], hosts[{}]'.format(
+                type(configurations), type(recommendedDefaults), type(services), type(hosts)))
         return []
 
 
