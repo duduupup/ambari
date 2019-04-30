@@ -37,6 +37,7 @@ class Cdh(object):
     @staticmethod
     def parse_xinsight_ini(xinsight_ini, ambari_hosts):
         xinsight_config = Cdh._parse_data(xinsight_ini, 'properties')
+        Logger.info('xinsight_config=[{}]'.format(xinsight_config))
         cm_host = xinsight_config.get('cm_host', '')
         cm_port = int(xinsight_config.get('cm_port', '7180'))
         cm_admin = xinsight_config.get('cm_admin', 'admin')
@@ -85,7 +86,7 @@ class Cdh(object):
         self.cdh_hdfs_info = self._get_cdh_hdfs_info()
         self.cdh_yarn_info = self._get_cdh_yarn_info()
         self.cdh_impala_info = self._get_cdh_impala_info()
-        self.chd_kudu_info = self._get_cdh_kudu_info()
+        self.cdh_kudu_info = self._get_cdh_kudu_info()
 
     def __str__(self):
         return 'CDH[\ncluster_name={}\nhosts={}\ncm={}\nzookeeper={}\nhdfs={}\nyarn={}\nimpala={}\nkudu={}\n]'.format(
@@ -94,7 +95,7 @@ class Cdh(object):
                 'admin': '{}:{}'.format(self.cm_admin, self.cm_admin_password),
                 'user': '{}:{}'.format(self.cm_user, self.cm_user_password)
             }, self.cdh_zookeeper_info, self.cdh_hdfs_info, self.cdh_yarn_info,
-            self.cdh_impala_info, self.chd_kudu_info)
+            self.cdh_impala_info, self.cdh_kudu_info)
 
     __repr__ = __str__
 
@@ -222,7 +223,7 @@ class Cdh(object):
             print(e)
             raise Fail('parse cdh.zookeeper.clientPort({}) failed. '.format(ret))
 
-        return {'servers': servers, 'client_port': client_port}
+        return {'servers': ','.join(servers), 'client_port': client_port}
 
     def _get_cdh_hdfs_info(self):
         service_name = 'hdfs'
@@ -271,7 +272,8 @@ class Cdh(object):
             print(e)
             raise Fail('parse cdh.yarn.resourcemanager.webapp.address({}) failed. '.format(ret))
 
-        return {'rm_webapp_address': rm_webapp_address, 'rm_webapp_https_address': rm_webapp_https_address}
+        return {'rm_webapp_address': ','.join(rm_webapp_address),
+                'rm_webapp_https_address': ','.join(rm_webapp_https_address)}
 
     def _get_cdh_impala_info(self):
         service_name = 'impala'
@@ -297,7 +299,7 @@ class Cdh(object):
             print(e)
             raise Fail('parse cdh.impala.port({}) failed. '.format(ret))
 
-        return {'server': daemon_servers, 'port': port}
+        return {'server': ','.join(daemon_servers), 'port': port}
 
     def _get_cdh_kudu_info(self):
         service_name = 'kudu'
@@ -309,7 +311,7 @@ class Cdh(object):
             print(e)
             raise Fail('parse cdh.kudu.master(({}) failed. '.format(ret))
 
-        return {'master': master_servers, 'port': '7051'}
+        return {'master': ','.join(master_servers), 'port': '7051'}
 
 
 try:
@@ -331,9 +333,8 @@ class XINSIGHT20COMMONServiceAdvisor(service_advisor.ServiceAdvisor):
     def __init__(self, *args, **kwargs):
         self.as_super = super(XINSIGHT20COMMONServiceAdvisor, self)
         self.as_super.__init__(*args, **kwargs)
-
         # Always call these methods
-        Logger.info('!!!!!!init: ')
+        Logger.info('!!!!!!init: args[{}], kwargs[{}]'.format(args, kwargs))
 
     """
     If any components of the service should be colocated with other services,
@@ -350,8 +351,7 @@ class XINSIGHT20COMMONServiceAdvisor(service_advisor.ServiceAdvisor):
           hostComponents.remove({"name": "HAWQSEGMENT"})
     """
     def colocateService(self, hostsComponentsMap, serviceComponents):
-        Logger.info('!!!!!!colocateService: hostsComponentsMap[{}], serviceComponents[{}]'.format(
-            type(hostsComponentsMap), type(serviceComponents)))
+        Logger.info('!!!!!!colocateService........................')
 
     """
     Any configuration recommendations for the service should be defined in this function.
@@ -359,9 +359,17 @@ class XINSIGHT20COMMONServiceAdvisor(service_advisor.ServiceAdvisor):
     such as recommendYARNConfigurations().
     """
     def getServiceConfigurationRecommendations(self, configurations, clusterSummary, services, hosts):
-        Logger.info(
-            '!!!!!!getServiceConfigurationRecommendations: configurations[{}], clusterSummary[{}], services[{}], hosts[{}]'.format(
-                type(configurations), type(clusterSummary), type(services), type(hosts)))
+        Logger.info('!!!!!!getServiceConfigurationRecommendations')
+        common_cdh = self.getServicesSiteProperties(services, 'common-cdh')
+        if common_cdh is not None:
+            self.refresh_configurations(configurations, services, hosts)
+            Logger.info('configurations[{}]'.format(configurations))
+        # desired_configs = clusterSummary['referenceHost']['desired_configs']
+        # Logger.info('!!!!!!getServiceConfigurationRecommendations: {}'.format(desired_configs))
+        # if 'common-env' not in desired_configs \
+        #         or self.getServicesSiteProperties(services, 'common-env')['cm_host'] == '{{cm_host}}':
+        #     self.refresh_configurations(configurations, services, hosts)
+        #     Logger.info('configurations[{}]'.format(configurations))
 
     """
     Returns an array of Validation objects about issues with the hostnames to which components are assigned.
@@ -369,9 +377,7 @@ class XINSIGHT20COMMONServiceAdvisor(service_advisor.ServiceAdvisor):
     The default validations are in stack_advisor.py getComponentLayoutValidations function.
     """
     def getServiceComponentLayoutValidations(self, services, hosts):
-        Logger.info('!!!!!!getServiceComponentLayoutValidations: services[{}], hosts[{}]'.format(
-            type(services), type(hosts)
-        ))
+        Logger.info('!!!!!!getServiceComponentLayoutValidations')
         return []
 
     """
@@ -380,9 +386,52 @@ class XINSIGHT20COMMONServiceAdvisor(service_advisor.ServiceAdvisor):
     such as validateHDFSConfigurations.
     """
     def getServiceConfigurationsValidationItems(self, configurations, recommendedDefaults, services, hosts):
-        Logger.info('!!!!!!getServiceConfigurationsValidationItemsconfigurations[{}], recommendedDefaults[{}], services[{}], hosts[{}]'.format(
-                type(configurations), type(recommendedDefaults), type(services), type(hosts)))
-        return []
+        Logger.info('!!!!!!##########################getServiceConfigurationsValidationItems##########################')
+        Logger.info('recommendedDefaults[{}]'.format(recommendedDefaults))
+        Logger.info('configurations[{}]'.format({'common-cdh': configurations.get('common-cdh', {})}))
+        Logger.info('services[{}]'.format({'common-cdh': services.get('configurations', {}).get('common-cdh', {})}))
+        validationItems = []
+        item = self.getWarnItem("zookeeper not listened on port 2181.")
+        validationItems.extend([{"config-name": "cdh_env", "item": item}])
+        return self.toConfigurationValidationProblems(validationItems, "common-cdh")
+
+    def refresh_configurations(self, configurations, services, hosts):
+        try:
+            cluster_env = self.getServicesSiteProperties(services, "cluster-env")
+            xsetup_ini_path = os.path.join(cluster_env['apps_path'], 'xsetup.ini')
+            ambari_hosts = [item['Hosts']['ip'] for item in hosts['items']]
+            Logger.info('ambari_hosts[{}]'.format(ambari_hosts))
+            Logger.info('xsetup_ini_path[{}]'.format(xsetup_ini_path))
+            # get xsetup.ini
+            if os.path.exists(xsetup_ini_path) and os.path.isfile(xsetup_ini_path):
+                with open(xsetup_ini_path, 'r') as f:
+                    xinsight_ini = f.read()
+            else:
+                xinsight_ini = ''
+
+            Logger.info('xinsight_ini: {}'.format(xinsight_ini))
+            cdh = Cdh(xinsight_ini, ambari_hosts)
+        except Exception as e:
+            Logger.error(e)
+            raise e
+
+        # generate configurations
+        putCommonCdhProperty = self.putProperty(configurations, "common-cdh", services)
+        cdh_env_dict = {
+            'cm.host': cdh.cm_host, 'cm.port': cdh.cm_port,
+            'cm.user': cdh.cm_user, 'cm.user.password': cdh.cm_user_password,
+            'cdh.zookeeper.server': cdh.cdh_zookeeper_info['servers'],
+            'cdh.zookeeper.client.port': cdh.cdh_zookeeper_info['client_port'],
+            'cdh.hdfs.default.fs': cdh.cdh_hdfs_info['default_fs'],
+            'cdh.yarn.rm.webapp.address': cdh.cdh_yarn_info['rm_webapp_address'],
+            'cdh.yarn.rm.webapp.https.address': cdh.cdh_yarn_info['rm_webapp_https_address'],
+            'cdh.impala.daemon.server': cdh.cdh_impala_info['server'],
+            'cdh.impala.daemon.hs2.port': cdh.cdh_impala_info['port'],
+            'cdh.kudu.master': cdh.cdh_kudu_info['master'],
+            'cdh.kudu.master.rpc.port': cdh.cdh_kudu_info['port']
+        }
+        cdh_env_info = '\n'.join(['{}={}'.format(key, value) for key, value in cdh_env_dict.items()])
+        putCommonCdhProperty('cdh_env', cdh_env_info)
 
 
 if __name__ == '__main__':
