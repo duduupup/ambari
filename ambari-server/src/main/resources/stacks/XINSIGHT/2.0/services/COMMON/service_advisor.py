@@ -22,18 +22,14 @@ import traceback
 import socket
 import base64
 import urllib2
-import ConfigParser
-import StringIO
-from xml.etree import ElementTree
 import ambari_simplejson as json
+from ambari_commons.config_utils import properties2dict, xml2dict
 from resource_management import Fail
 from resource_management.core.logger import Logger
 import ambari_commons.network as network
 
 
 class Cdh(object):
-    MyConfigParser = type('MyConfigParser', (ConfigParser.RawConfigParser, object), {'optionxform': lambda self, x: x})
-
     @staticmethod
     def parse_xinsight_ini(xinsight_ini, ambari_hosts):
         xinsight_config = Cdh._parse_data(xinsight_ini, 'properties')
@@ -67,13 +63,9 @@ class Cdh(object):
         elif data_type == 'json':
             return json.loads(data_content)
         elif data_type == 'properties':
-            config_parser = Cdh.MyConfigParser()
-            config_parser.readfp(StringIO.StringIO('[dummy]\n' + data_content))
-            return {key: value for key, value in config_parser.items('dummy')}
+            return properties2dict(data_content)
         elif data_type == 'xml':
-            property_nodes = ElementTree.fromstring(data_content).findall('property')
-            return {property_node.findall('name')[0].text.strip(): property_node.findall('value')[0].text.strip()
-                    for property_node in property_nodes}
+            return xml2dict(data_content)
         else:
             raise KeyError('unknown rsp_type[{}]'.format(data_type))
 
@@ -387,13 +379,19 @@ class XINSIGHT20COMMONServiceAdvisor(service_advisor.ServiceAdvisor):
     """
     def getServiceConfigurationsValidationItems(self, configurations, recommendedDefaults, services, hosts):
         Logger.info('!!!!!!##########################getServiceConfigurationsValidationItems##########################')
-        Logger.info('recommendedDefaults[{}]'.format(recommendedDefaults))
-        Logger.info('configurations[{}]'.format({'common-cdh': configurations.get('common-cdh', {})}))
-        Logger.info('services[{}]'.format({'common-cdh': services.get('configurations', {}).get('common-cdh', {})}))
-        validationItems = []
-        item = self.getWarnItem("zookeeper not listened on port 2181.")
-        validationItems.extend([{"config-name": "cdh_env", "item": item}])
-        return self.toConfigurationValidationProblems(validationItems, "common-cdh")
+        if 'common-cdh' in configurations:
+            Logger.info('recommendedDefaults[{}]'.format(recommendedDefaults))
+            Logger.info('configurations[{}]'.format({'common-cdh': configurations.get('common-cdh', {})}))
+            Logger.info('services[{}]'.format({'common-cdh': services.get('configurations', {}).get('common-cdh', {})}))
+            recommended_cdh_env = recommendedDefaults.get('common-cdh', {}).get('properties', {}).get('cdh_env', None)
+            configurations_cdh_env = configurations.get('common-cdh', {}).get('properties', {}).get('cdh_env', None)
+            if configurations_cdh_env is None or recommended_cdh_env is None or \
+                    configurations_cdh_env != configurations_cdh_env:
+                validationItems = []
+                item = self.getErrorItem("cdh_env must use the recommended value.")
+                validationItems.extend([{"config-name": "cdh_env", "item": item}])
+                return self.toConfigurationValidationProblems(validationItems, "common-cdh")
+        return []
 
     def refresh_configurations(self, configurations, services, hosts):
         try:
