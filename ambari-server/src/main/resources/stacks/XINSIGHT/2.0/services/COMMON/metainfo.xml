@@ -10,7 +10,6 @@
             <comment>This is the common config for the xinsight production.</comment>
             <version>2.0.0</version>
 
-
             <components>
                 <component>
                     <name>COMMON_CLIENT</name>
@@ -27,8 +26,18 @@
                     <configFiles>
                         <configFile>
                             <type>xml</type>
-                            <fileName>xinsight.properties</fileName>
-                            <dictionaryName>common-xinsight</dictionaryName>
+                            <fileName>common-cdh.xml</fileName>
+                            <dictionaryName>common-cdh/cdh_env</dictionaryName>
+                        </configFile>
+                        <configFile>
+                            <type>xml</type>
+                            <fileName>common-conf.xml</fileName>
+                            <dictionaryName>common-conf</dictionaryName>
+                        </configFile>
+                        <configFile>
+                            <type>xml</type>
+                            <fileName>common-env.xml</fileName>
+                            <dictionaryName>common-env</dictionaryName>
                         </configFile>
                     </configFiles>
                 </component>
@@ -40,9 +49,10 @@
                 </osSpecific>
             </osSpecifics>
 
-
             <configuration-dependencies>
-                <config-type>common-xinsight</config-type>
+                <config-type>common-cdh</config-type>
+                <config-type>common-conf</config-type>
+                <config-type>common-env</config-type>
             </configuration-dependencies>
         </service>
     </services>

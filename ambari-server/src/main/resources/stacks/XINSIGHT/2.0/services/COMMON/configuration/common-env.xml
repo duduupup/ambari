@@ -3,8 +3,8 @@
 <configuration support_final="true">
 
     <property>
-        <name>cdh_env</name>
-        <display-name>CDH Environment</display-name>
+        <name>xinsight_env</name>
+        <display-name>XINSIGHT Environment</display-name>
         <value><![CDATA[
 ]]></value>
         <value-attributes>
