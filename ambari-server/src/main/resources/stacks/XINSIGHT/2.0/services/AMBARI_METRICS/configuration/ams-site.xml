@@ -710,14 +710,14 @@
   </property>
   <property>
     <name>cluster.zookeeper.quorum</name>
-    <value>xinsight_zookeeper_quorum</value>
+    <value></value>
     <description>Comma separated list of servers in the cluster ZooKeeper Quorum.
     </description>
     <on-ambari-upgrade add="true"/>
   </property>
   <property>
     <name>cluster.zookeeper.property.clientPort</name>
-    <value>2181</value>
+    <value></value>
     <on-ambari-upgrade add="true"/>
   </property>
   <property>

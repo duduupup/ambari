@@ -399,7 +399,7 @@ class XINSIGHT20COMMONServiceAdvisor(service_advisor.ServiceAdvisor):
           hostComponents.remove({"name": "HAWQSEGMENT"})
     """
     def colocateService(self, hostsComponentsMap, serviceComponents):
-        Logger.info('!!!!!!colocateService........................')
+        Logger.info('!!!!!!COMMON colocateService........................')
 
     """
     Any configuration recommendations for the service should be defined in this function.
@@ -407,9 +407,9 @@ class XINSIGHT20COMMONServiceAdvisor(service_advisor.ServiceAdvisor):
     such as recommendYARNConfigurations().
     """
     def getServiceConfigurationRecommendations(self, configurations, clusterSummary, services, hosts):
-        Logger.info('!!!!!!getServiceConfigurationRecommendations')
-        common_cdh = self.getServicesSiteProperties(services, 'common-cdh')
-        if common_cdh is not None:
+        Logger.info('!!!!!!COMMON getServiceConfigurationRecommendations')
+        common_env = self.getServicesSiteProperties(services, 'common-env')
+        if common_env is not None:
             cluster_env = self.getServicesSiteProperties(services, "cluster-env")
             xsetup_ini_path = os.path.join(cluster_env['apps_path'], 'xsetup.ini')
             Logger.info('xsetup_ini_path[{}]'.format(xsetup_ini_path))
@@ -433,7 +433,7 @@ class XINSIGHT20COMMONServiceAdvisor(service_advisor.ServiceAdvisor):
     The default validations are in stack_advisor.py getComponentLayoutValidations function.
     """
     def getServiceComponentLayoutValidations(self, services, hosts):
-        Logger.info('!!!!!!getServiceComponentLayoutValidations')
+        Logger.info('!!!!!!COMMON getServiceComponentLayoutValidations')
 
         return []
 
@@ -443,8 +443,8 @@ class XINSIGHT20COMMONServiceAdvisor(service_advisor.ServiceAdvisor):
     such as validateHDFSConfigurations.
     """
     def getServiceConfigurationsValidationItems(self, configurations, recommendedDefaults, services, hosts):
-        Logger.info('!!!!!!##########################getServiceConfigurationsValidationItems##########################')
-        if 'common-cdh' in configurations:
+        Logger.info('!!!!!!######################COMMON getServiceConfigurationsValidationItems#######################')
+        if 'common-env' in configurations:
             Logger.info('recommendedDefaults[{}]'.format(recommendedDefaults))
             items = []
             items.extend(self.validate_cdh_configurations(configurations, recommendedDefaults, services, hosts))

@@ -148,6 +148,7 @@
       </commandScript>
 
       <configuration-dependencies>
+        <config-type>common-cdh</config-type>
         <config-type>ams-env</config-type>
       </configuration-dependencies>
 
