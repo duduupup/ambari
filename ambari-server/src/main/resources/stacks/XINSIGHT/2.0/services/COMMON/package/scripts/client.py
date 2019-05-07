@@ -21,10 +21,11 @@ def generate_xinsight_properties():
 
     ha_proxy_vip = xinsight.get_conf(common_conf, 'ha.proxy.vip')
     postgres_write_vip = xinsight.get_conf(common_conf, 'postgres.write.vip')
+    redis_vip = xinsight.get_conf(common_conf, 'redis.vip')
+    redis_host = '{}:{}'.format(redis_vip, xinsight.get_conf(common_conf, 'redis.port')) if redis_vip != '' else ''
 
     nginx_server = xinsight_env_dict['nginx.server']
     ldap_enable = xinsight_env_dict['ldap.enable']
-    redis_host = xinsight_env_dict['redis.host']
     redis_cluster_host = xinsight_env_dict['redis.cluster.host']
     nginx_addr = '{}:{}'.format(nginx_server, xinsight.get_conf(common_conf, 'nginx.port')
                                 ) if nginx_server != '' else ''

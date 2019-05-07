@@ -67,7 +67,7 @@ class XINSIGHT20AMBARIMETRICSServiceAdvisor(service_advisor.ServiceAdvisor):
     such as recommendYARNConfigurations().
     """
     def getServiceConfigurationRecommendations(self, configurations, clusterSummary, services, hosts):
-        Logger.info('!!!!!!AMBARI_METRICS getServiceConfigurationRecommendations')
+        Logger.info('##########AMBARI_METRICS getServiceConfigurationRecommendations')
         ams_env = self.getServicesSiteProperties(services, 'ams-env')
         if ams_env is not None:
             self.refresh_ams_site_configurations(configurations, clusterSummary, services, hosts)
@@ -89,25 +89,27 @@ class XINSIGHT20AMBARIMETRICSServiceAdvisor(service_advisor.ServiceAdvisor):
     such as validateHDFSConfigurations.
     """
     def getServiceConfigurationsValidationItems(self, configurations, recommendedDefaults, services, hosts):
-        Logger.info('!!!!!!###################AMBARI_METRICS getServiceConfigurationsValidationItems##################')
+        Logger.info('##########AMBARI_METRICS getServiceConfigurationsValidationItems')
         if 'ams-env' in configurations:
             items = []
-            items.extend(self.validate_cdh_configurations(configurations, recommendedDefaults, services, hosts))
-            items.extend(self.validate_conf_configurations(configurations, recommendedDefaults, services, hosts))
-            items.extend(self.validate_env_configurations(configurations, recommendedDefaults, services, hosts))
+            items.extend(self.validate_ams_site_configurations(configurations, recommendedDefaults, services, hosts))
             return items
         return []
 
     def refresh_ams_site_configurations(self, configurations, clusterSummary, services, hosts):
         # generate configurations
-        cdh_env = self.getServicesSiteProperties(services, 'common-cdh').get('cdh_env', None)
-        cdh_env_dict = properties2dict(cdh_env) if cdh_env is not None else {}
-        cdh_zk_server = cdh_env_dict.get('cdh.zookeeper.server', None)
+        cdh_zk_server = None
+        common_cdh = self.getServicesSiteProperties(services, 'common-cdh')
+        if common_cdh is not None:
+            cdh_env = common_cdh.get('cdh_env', None)
+            cdh_zk_server = properties2dict(cdh_env).get('cdh.zookeeper.server', None) if cdh_env is not None else None
+        if cdh_zk_server is None:
+            cdh_env = configurations.get('common-cdh', {}).get('properties', {}).get('cdh_env', None)
+            cdh_zk_server = properties2dict(cdh_env).get('cdh.zookeeper.server', None) if cdh_env is not None else None
         Logger.info('cdh_zk_server[{}]'.format(cdh_zk_server))
         if cdh_zk_server is not None:
             cluster_zk_quorum = ','.join([server.split(':')[0] for server in cdh_zk_server.split(',')])
             cluster_zk_client_port = cdh_zk_server.split(',')[0].split(':')[1]
-
             putAmsSiteProperty = self.putProperty(configurations, 'ams-site', services)
             putAmsSiteProperty('cluster.zookeeper.quorum', cluster_zk_quorum)
             putAmsSiteProperty('cluster.zookeeper.property.clientPort', cluster_zk_client_port)

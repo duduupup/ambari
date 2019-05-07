@@ -15,6 +15,7 @@ xinsight_default_dict = {
     'ldap.domain.name': 'xinsight',
     'ldap.domain.suffix': 'com',
     'ldap.root.password': 'q1w2e3',
+    'redis.port': '6379',
     'redis.timeout': '3000',
     'redis.cluster.timeout': '60000',
     'redis.cluster.maxRedirections': '3',
