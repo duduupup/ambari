@@ -3496,3 +3496,23 @@ class DefaultStackAdvisor(StackAdvisor):
             componentList.append(component["StackServiceComponents"]["component_name"])
 
     return serviceList, componentList
+
+  def get_service_component_dict(self, services, hosts):
+    services_component_dict = {}
+    if services is not None and hosts is not None:
+      host_dict = {}
+      for host in hosts.get('items', []):
+        host_info = host['Hosts']
+        host_dict[host_info['host_name']] = host_info['ip']
+
+      for service in services.get('services', []):
+        service_name = service['StackServices']['service_name']
+        components_dict = {}
+        for component in service['components']:
+          component_info = component['StackServiceComponents']
+          components_dict[component_info['component_name']] = [
+            host_dict[hostname] for hostname in component_info['hostnames']]
+
+        services_component_dict[service_name] = components_dict
+
+    return services_component_dict
