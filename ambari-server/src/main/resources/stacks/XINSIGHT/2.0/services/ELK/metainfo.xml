@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<metainfo>
+    <schemaVersion>2.0</schemaVersion>
+
+    <services>
+        <service>
+            <name>ELK</name>
+            <displayName>ELK</displayName>
+            <comment>The elk service.</comment>
+            <version>0.9.0</version>
+            <recovery_enabled>false</recovery_enabled>
+            <components>
+                <!-- master -->
+                <component>
+                    <name>ELK_MASTER</name>
+                    <displayName>es master node</displayName>
+                    <category>MASTER</category>
+                    <cardinality>1+</cardinality>
+                    <versionAdvertised>true</versionAdvertised>
+                    <commandScript>
+                        <script>scripts/elk_master.py</script>
+                        <scriptType>PYTHON</scriptType>
+                        <timeout>600</timeout>
+                    </commandScript>
+                </component>
+
+                <!-- data -->
+                <component>
+                    <name>ELK_DATA</name>
+                    <displayName>es data node</displayName>
+                    <category>SLAVE</category>
+                    <cardinality>1+</cardinality>
+                    <versionAdvertised>true</versionAdvertised>
+                    <commandScript>
+                        <script>scripts/elk_data.py</script>
+                        <scriptType>PYTHON</scriptType>
+                        <timeout>600</timeout>
+                    </commandScript>
+                </component>
+
+                <!-- transport -->
+                <component>
+                    <name>ELK_CLIENT</name>
+                    <displayName>es client node</displayName>
+                    <category>SLAVE</category>
+                    <cardinality>0+</cardinality>
+                    <versionAdvertised>true</versionAdvertised>
+                    <commandScript>
+                        <script>scripts/elk_client.py</script>
+                        <scriptType>PYTHON</scriptType>
+                        <timeout>600</timeout>
+                    </commandScript>
+                </component>
+
+                <!-- kibana -->
+                <component>
+                    <name>ELK_KIBANA</name>
+                    <displayName>kibana</displayName>
+                    <category>SLAVE</category>
+                    <cardinality>1+</cardinality>
+                    <versionAdvertised>true</versionAdvertised>
+                    <commandScript>
+                        <script>scripts/elk_kibana.py</script>
+                        <scriptType>PYTHON</scriptType>
+                        <timeout>600</timeout>
+                    </commandScript>
+                </component>
+            </components>
+
+            <osSpecifics>
+                <osSpecific>
+                    <osFamily>any</osFamily>
+                    <packages>
+                        <package>
+                            <name>jdk1.8-1.8.0_162</name>
+                        </package>
+                        <package>
+                            <name>opendistroforelasticsearch-0.9.0</name>
+                        </package>
+                        <package>
+                            <name>opendistroforelasticsearch-kibana-0.9.0</name>
+                        </package>
+                    </packages>
+                </osSpecific>
+            </osSpecifics>
+
+            <configuration-dependencies>
+                <config-type>elk-env</config-type>
+            </configuration-dependencies>
+        </service>
+    </services>
+</metainfo>

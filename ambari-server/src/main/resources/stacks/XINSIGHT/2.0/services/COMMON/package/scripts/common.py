@@ -1,17 +1,14 @@
 # coding=utf-8
 from ambari_commons.config_utils import properties2dict
 from resource_management import *
-from resource_management.core.exceptions import ClientComponentHasNoStatus
 import xinsight
 
 
-def generate_xinsight_properties():
+def common_configure():
     import params
-    Directory(format("{service_path}/conf"),
-              owner=params.service_user, group=params.user_group,
-              create_parents=True,
-              recursive_ownership=True,
-              mode=0755)
+    Directory(params.common_conf_dir, owner=params.common_user, group=params.common_group,
+              create_parents=True, recursive_ownership=True, mode=0755)
+
     common_env = params.config['configurations']['common-env']
     common_cdh = params.config['configurations']['common-cdh']
     common_conf = params.config['configurations']['common-conf']
@@ -25,7 +22,7 @@ def generate_xinsight_properties():
     redis_host = '{}:{}'.format(redis_vip, xinsight.get_conf(common_conf, 'redis.port')) if redis_vip != '' else ''
 
     nginx_server = xinsight_env_dict['nginx.server']
-    ldap_enable = xinsight_env_dict['ldap.enable']
+    ldap_enable = True if xinsight_env_dict['ldap.enable'] == 'true' else False
     redis_cluster_host = xinsight_env_dict['redis.cluster.host']
     nginx_addr = '{}:{}'.format(nginx_server, xinsight.get_conf(common_conf, 'nginx.port')
                                 ) if nginx_server != '' else ''
@@ -61,21 +58,22 @@ def generate_xinsight_properties():
         'aas': {
             'aas.host': nginx_addr,
             'aas_web.host': nginx_addr,
-            'ldap.sync.flag': ldap_enable,
-            'ldap.url': '{}:{}'.format(ha_proxy_vip, xinsight.get_conf(common_conf, 'ha.proxy.ldap.port')
-                                       ) if ha_proxy_vip != '' else '',
 
             'token.timeout': xinsight.get_conf(common_conf, 'aas.token.timeout'),
             'aas.kickout': xinsight.get_conf(common_conf, 'aas.kickout'),
             'aas.rest_service_name': xinsight.get_conf(common_conf, 'aas.rest_service_name'),
             'aas.config_service_name': xinsight.get_conf(common_conf, 'aas.config_service_name'),
             'aas.network.protocol': xinsight.get_conf(common_conf, 'aas.network.protocol'),
-            'ldap.base': 'dc={},dc={}'.format(xinsight.get_conf(common_conf, 'ldap.domain.name'),
-                                              xinsight.get_conf(common_conf, 'ldap.domain.suffix')),
-            'ldap.userDn': 'cn={},dc={},dc={}'.format(xinsight.get_conf(common_conf, 'ldap.common.name'),
-                                                      xinsight.get_conf(common_conf, 'ldap.domain.name'),
-                                                      xinsight.get_conf(common_conf, 'ldap.domain.suffix')),
-            'ldap.password': xinsight.get_conf(common_conf, 'ldap.root.password'),
+
+            'ldap.sync.flag': str(ldap_enable),
+            'ldap.url': '{}:{}'.format(ha_proxy_vip, xinsight.get_conf(common_conf, 'ha.proxy.ldap.port')
+                                       ) if ha_proxy_vip != '' else '',
+            'ldap.base': 'dc={},dc={}'.format(xinsight_env_dict['ldap.domain.name'],
+                                              xinsight_env_dict['ldap.domain.suffix']) if ldap_enable else '',
+            'ldap.userDn': 'cn={},dc={},dc={}'.format(xinsight_env_dict['ldap.common.name'],
+                                                      xinsight_env_dict['ldap.domain.name'],
+                                                      xinsight_env_dict['ldap.domain.suffix']) if ldap_enable else '',
+            'ldap.password': xinsight_env_dict['ldap.admin.password'] if ldap_enable else '',
         },
         'ccs': {
             'ccs.host': nginx_addr,
@@ -122,7 +120,7 @@ def generate_xinsight_properties():
         },
         'sts': {
             'sts.host': nginx_addr,
-            'sts.impala.ldap.auth.enabled': cdh_env_dict['cdh.impala.ldap.enable'],
+            'sts.impala.ldap.auth.enabled': cdh_env_dict['cdh.impala.ldap.enable'] if ldap_enable else 'false',
             'sts.impala.quorum': cdh_env_dict['cdh.impala.daemon.server'] if ha_proxy_vip == '' else ha_proxy_vip,
             'sts.impala.port': cdh_env_dict['cdh.impala.daemon.hs2.port'] if ha_proxy_vip == '' else xinsight.get_conf(
                 common_conf, 'ha.proxy.impala.port'),
@@ -133,7 +131,7 @@ def generate_xinsight_properties():
             'sts.rest_service_name': xinsight.get_conf(common_conf, 'sts.rest_service_name'),
             'sts.config_service_name': xinsight.get_conf(common_conf, 'sts.config_service_name'),
             'sts.impala.user': xinsight.get_conf(common_conf, 'sts.impala.user'),
-            'sts.impala.password': xinsight.get_conf(common_conf, 'sts.impala.password'),
+            'sts.impala.password': xinsight_env_dict['ldap.impala.password'] if ldap_enable else '',
         },
         'tss': {
             'tss.host': nginx_addr,
@@ -161,23 +159,5 @@ def generate_xinsight_properties():
             ['{}={}\n'.format(key, value) for key, value in xinsight_properties_dict[section].items()])
         )) for section in sorted(xinsight_properties_dict.keys())
     ])
-    File(format("{service_path}/conf/xinsight.properties"), content=xinsight_properties_content, mode=0755,
-         owner=params.service_user, group=params.user_group)
-
-
-class ServiceClient(Script):
-
-    def install(self, env):
-        self.configure(env)
-        generate_xinsight_properties()
-
-    def configure(self, env):
-        import params
-        env.set_params(params)
-
-    def status(self, env):
-        raise ClientComponentHasNoStatus()
-
-
-if __name__ == "__main__":
-    ServiceClient().execute()
+    File(format("{service_path}/conf/xinsight.properties"), content=xinsight_properties_content, mode=0644,
+         owner=params.common_user, group=params.common_group)

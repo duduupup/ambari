@@ -1,0 +1,17 @@
+# replace to your own domain name for "dc=***,dc=***" section
+dn: dc=xinsight,dc=com
+objectClass: top
+objectClass: dcObject
+objectclass: organization
+o: Baosight
+dc: xinsight
+
+dn: ou=Group,dc=xinsight,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: groups
+
+dn: ou=People,dc=xinsight,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: users

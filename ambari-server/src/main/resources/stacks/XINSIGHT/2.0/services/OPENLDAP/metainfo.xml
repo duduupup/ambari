@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<metainfo>
+    <schemaVersion>2.0</schemaVersion>
+
+    <services>
+        <service>
+            <name>OPENLDAP</name>
+            <displayName>OPENLDAP</displayName>
+            <comment>The openldap service.</comment>
+            <version>2.0.0</version>
+            <components>
+                <!-- ldap server -->
+                <component>
+                    <name>OPENLDAP_SERVER</name>
+                    <displayName>openldap server</displayName>
+                    <category>MASTER</category>
+                    <cardinality>1+</cardinality>
+                    <versionAdvertised>true</versionAdvertised>
+                    <commandScript>
+                        <script>scripts/ldap_master.py</script>
+                        <scriptType>PYTHON</scriptType>
+                        <timeout>1200</timeout>
+                    </commandScript>
+                </component>
+            </components>
+
+            <osSpecifics>
+                <osSpecific>
+                    <osFamily>any</osFamily>
+                    <packages>
+                        <package>
+                            <name>libtool-ltdl-2.4.2</name>
+                        </package>
+                        <package>
+                            <name>migrationtools-47</name>
+                        </package>
+                        <package>
+                            <name>openldap-2.4.44</name>
+                        </package>
+                        <package>
+                            <name>openldap-servers-2.4.44</name>
+                        </package>
+                        <package>
+                            <name>openldap-clients-2.4.44</name>
+                        </package>
+                    </packages>
+                </osSpecific>
+            </osSpecifics>
+        </service>
+    </services>
+</metainfo>

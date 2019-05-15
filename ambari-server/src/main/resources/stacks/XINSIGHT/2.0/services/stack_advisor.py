@@ -453,14 +453,32 @@ class XINSIGHT20StackAdvisor(DefaultStackAdvisor):
         putCommonConfProperty('xinsight_conf', xinsight_conf_info)
 
     def refresh_env_configurations(self, configurations, clusterSummary, services, hosts):
+        services_component_dict = self.get_service_component_dict(services, hosts)
+        Logger.info('##########services_component_dict[{}]'.format(json.dumps(services_component_dict)))
         # generate configurations
         putCommonEnvProperty = self.putProperty(configurations, "common-env", services)
         xinsight_env_dict = {
-            'nginx.server': '',
-            'ldap.enable': 'false',
-            'redis.cluster.host': '',
+            'nginx.server': ','.join(services_component_dict['NGINX']['NGINX_SERVER']
+                                     ) if 'NGINX' in services_component_dict else '',
+            'redis.cluster.host': ','.join(services_component_dict['REDISCLS']['REDISCLS_SERVER']
+                                           ) if 'REDISCLS' in services_component_dict else '',
         }
-        # TODO: update
+        if 'HAPROXY' in services_component_dict and 'OPENLDAP' in services_component_dict:
+            openldap_env = self.getServicesSiteProperties(services, 'openldap-env')
+            Logger.info('##########openldap_env[{}]'.format(json.dumps(openldap_env)))
+            xinsight_env_dict.update({
+                'ldap.enable': 'true',
+                'ldap.domain.name': openldap_env['ldap_domain_name'],
+                'ldap.domain.suffix': openldap_env['ldap_domain_suffix'],
+                'ldap.common.name': openldap_env['ldap_common_name'],
+                'ldap.admin.password': openldap_env['ldap_admin_password'],
+                'ldap.impala.password': openldap_env['ldap_impala_password'],
+            })
+        else:
+            xinsight_env_dict.update({
+                'ldap.enable': 'false',
+            })
+
         xinsight_env_info = '\n'.join(['{}={}'.format(key, xinsight_env_dict[key])
                                        for key in sorted(xinsight_env_dict.keys())])
         putCommonEnvProperty('xinsight_env', xinsight_env_info)

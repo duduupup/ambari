@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<configuration support_final="true">
+
+    <property>
+        <name>ldap_domain_name</name>
+        <description/>
+        <display-name>Openldap Domain Name</display-name>
+        <value>xinsight</value>
+        <value-attributes>
+            <editable-only-at-install>true</editable-only-at-install>
+        </value-attributes>
+    </property>
+
+    <property>
+        <name>ldap_domain_suffix</name>
+        <description/>
+        <display-name>Openldap Domain Suffix</display-name>
+        <value>com</value>
+        <value-attributes>
+            <editable-only-at-install>true</editable-only-at-install>
+        </value-attributes>
+    </property>
+
+    <property>
+        <name>ldap_common_name</name>
+        <description/>
+        <display-name>Openldap Common Name</display-name>
+        <value>Manager</value>
+        <value-attributes>
+            <editable-only-at-install>true</editable-only-at-install>
+        </value-attributes>
+    </property>
+
+    <property>
+        <name>ldap_admin_password</name>
+        <value>q1w2e3</value>
+        <property-type>PASSWORD</property-type>
+        <description>Please make sure the password change in OPENLDAP is reflected back in Ambari.</description>
+        <display-name>Openldap Admin Password</display-name>
+        <value-attributes>
+            <overridable>false</overridable>
+            <type>password</type>
+        </value-attributes>
+    </property>
+
+    <property>
+        <name>ldap_impala_password</name>
+        <value>q1w2e3</value>
+        <property-type>PASSWORD</property-type>
+        <description>Please make sure the password change in OPENLDAP is reflected back in Ambari.</description>
+        <display-name>Openldap User(impala) Password</display-name>
+        <value-attributes>
+            <overridable>false</overridable>
+            <type>password</type>
+        </value-attributes>
+    </property>
+
+</configuration>

@@ -1,0 +1,10 @@
+{
+  "general_deps" : {
+    "_comment" : "dependencies for elk",
+    "ELK_DATA-INSTALL": ["ELK_MASTER-INSTALL"],
+    "ELK_CLIENT-INSTALL": ["ELK_DATA-INSTALL"],
+    "ELK_KIBANA-INSTALL": ["ELK_CLIENT-INSTALL"],
+    "ELK_DATA-START": ["ELK_MASTER-START"],
+    "ELK_CLIENT-START": ["ELK_DATA-START"]
+  }
+}

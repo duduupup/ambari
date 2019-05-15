@@ -17,6 +17,7 @@ xinsight_default_dict = {
     'ldap.root.password': 'q1w2e3',
     'redis.port': '6379',
     'redis.timeout': '3000',
+    'redis.cluster.port': '7001,7002,7003,7004',
     'redis.cluster.timeout': '60000',
     'redis.cluster.maxRedirections': '3',
     'postgres.port': '5432',

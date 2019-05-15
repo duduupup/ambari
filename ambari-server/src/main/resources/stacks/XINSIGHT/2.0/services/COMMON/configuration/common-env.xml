@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <configuration support_final="true">
 
     <property>
@@ -10,6 +10,14 @@
         <value-attributes>
             <type>content</type>
         </value-attributes>
+        <depends-on>
+            <property>
+                <type>haproxy-env</type>
+            </property>
+            <property>
+                <type>openldap-env</type>
+            </property>
+        </depends-on>
     </property>
 
 </configuration>
