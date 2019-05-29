@@ -12,10 +12,28 @@
         </value-attributes>
         <depends-on>
             <property>
-                <type>haproxy-env</type>
+                <type>nginx-conf-pub</type>
             </property>
             <property>
-                <type>openldap-env</type>
+                <type>haproxy-conf-pub</type>
+            </property>
+            <property>
+                <type>openldap-conf-pub</type>
+            </property>
+            <property>
+                <type>redis-conf-pub</type>
+            </property>
+            <property>
+                <type>rediscls-conf-pub</type>
+            </property>
+            <property>
+                <type>rds-conf-pub</type>
+            </property>
+            <property>
+                <type>tsdb-conf-pub</type>
+            </property>
+            <property>
+                <type>rgs-conf-pub</type>
             </property>
         </depends-on>
     </property>

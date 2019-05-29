@@ -74,13 +74,14 @@ class Cdh(object):
             Cdh.parse_xsetup_conf(xsetup_conf_dict, ambari_hosts)
         self.cdh_hosts = self._get_cdh_hosts()
         self.cdh_cluster_name = self._get_cdh_cluster_name()
-        self.cdh_zookeeper_info = self._get_cdh_zookeeper_info()
-        self.cdh_hdfs_info = self._get_cdh_hdfs_info()
-        self.cdh_yarn_info = self._get_cdh_yarn_info()
-        self.cdh_hbase_info = self._get_cdh_hbase_info()
-        self.cdh_kafka_info = self._get_cdh_kafka_info()
-        self.cdh_impala_info = self._get_cdh_impala_info()
-        self.cdh_kudu_info = self._get_cdh_kudu_info()
+        services = self._get_cdh_services()
+        self.cdh_zookeeper_info = self._get_cdh_zookeeper_info() if 'zookeeper' in services else {}
+        self.cdh_hdfs_info = self._get_cdh_hdfs_info() if 'hdfs' in services else {}
+        self.cdh_yarn_info = self._get_cdh_yarn_info() if 'yarn' in services else {}
+        self.cdh_hbase_info = self._get_cdh_hbase_info() if 'hbase' in services else {}
+        self.cdh_kafka_info = self._get_cdh_kafka_info() if 'kafka' in services else {}
+        self.cdh_impala_info = self._get_cdh_impala_info() if 'impala' in services else {}
+        self.cdh_kudu_info = self._get_cdh_kudu_info() if 'zookeeper' in services else {}
 
     def __str__(self):
         return 'CDH[\ncluster_name={}\nhosts={}\ncm={}\nzookeeper={}\nhdfs={}\nyarn={}\nhbase={}\nkafka={}\nimpala={}\nkudu={}\n]'.format(
@@ -109,6 +110,14 @@ class Cdh(object):
         ret = self._call_cm_api('/api/v6/clusters')
         try:
             return ret.get('items', [])[0]['displayName']
+        except Exception as e:
+            Logger.error(str(e))
+            raise Fail('parse cdh.cluster.name({}) failed. '.format(ret))
+
+    def _get_cdh_services(self):
+        ret = self._call_cm_api('/api/v6/clusters/{}/services'.format(self.cdh_cluster_name))
+        try:
+            return [service['name'] for service in ret.get('items', [])]
         except Exception as e:
             Logger.error(str(e))
             raise Fail('parse cdh.cluster.name({}) failed. '.format(ret))
@@ -385,7 +394,7 @@ class XINSIGHT20StackAdvisor(DefaultStackAdvisor):
         Logger.info('##########COMMON getServiceConfigurationRecommendations')
         common_env = self.getServicesSiteProperties(services, 'common-env')
         ams_env = self.getServicesSiteProperties(services, 'ams-env')
-        if common_env is not None or ams_env is not None:
+        if common_env is not None:
             cluster_env = self.getServicesSiteProperties(services, "cluster-env")
             xsetup_ini_path = os.path.join(cluster_env['apps_path'], 'xsetup.ini')
             Logger.info('xsetup_ini_path[{}]'.format(xsetup_ini_path))
@@ -458,25 +467,80 @@ class XINSIGHT20StackAdvisor(DefaultStackAdvisor):
         # generate configurations
         putCommonEnvProperty = self.putProperty(configurations, "common-env", services)
         xinsight_env_dict = {
-            'nginx.server': ','.join(services_component_dict['NGINX']['NGINX_SERVER']
-                                     ) if 'NGINX' in services_component_dict else '',
-            'redis.cluster.host': ','.join(services_component_dict['REDISCLS']['REDISCLS_SERVER']
-                                           ) if 'REDISCLS' in services_component_dict else '',
+            'nginx.server': '',
+            'haproxy.vip': '',
+            'ldap.enable': 'false',
+            'redis.server': '',
+            'redis.cluster.server': '',
         }
-        if 'HAPROXY' in services_component_dict and 'OPENLDAP' in services_component_dict:
-            openldap_env = self.getServicesSiteProperties(services, 'openldap-env')
-            Logger.info('##########openldap_env[{}]'.format(json.dumps(openldap_env)))
+        if 'NGINX' in services_component_dict:
+            servers = services_component_dict['NGINX']['NGINX_SERVER']
+            port = self.getServicesSiteProperties(services, 'nginx-conf-pub')['nginx_port']
+            xinsight_env_dict.update({
+                'nginx.server': ','.join(['{}:{}'.format(server, port) for server in servers]),
+            })
+
+        if 'HAPROXY' in services_component_dict:
+            ha_proxy_conf = self.getServicesSiteProperties(services, 'haproxy-conf-pub')
+            xinsight_env_dict.update({
+                'haproxy.vip': ha_proxy_conf['haproxy_vip'],
+                'haproxy.impala.port': ha_proxy_conf['haproxy_impala_port'],
+                'haproxy.ldap.port': ha_proxy_conf['haproxy_ldap_port'],
+                'haproxy.pds.gateway.port': ha_proxy_conf['haproxy_pds_gateway_port'],
+                'haproxy.tsdb.proxy.port': ha_proxy_conf['haproxy_tsdb_proxy_port'],
+                'haproxy.tsdb.gateway.port': ha_proxy_conf['haproxy_tsdb_gateway_port'],
+                'haproxy.tsdb.gateway.subscribe.port': ha_proxy_conf['haproxy_tsdb_gateway_subscribe_port'],
+            })
+
+        if 'OPENLDAP' in services_component_dict:
+            servers = services_component_dict['OPENLDAP']['OPENLDAP_SERVER']
+            openldap_conf = self.getServicesSiteProperties(services, 'openldap-conf-pub')
+            port = openldap_conf['openldap_port']
             xinsight_env_dict.update({
                 'ldap.enable': 'true',
-                'ldap.domain.name': openldap_env['ldap_domain_name'],
-                'ldap.domain.suffix': openldap_env['ldap_domain_suffix'],
-                'ldap.common.name': openldap_env['ldap_common_name'],
-                'ldap.admin.password': openldap_env['ldap_admin_password'],
-                'ldap.impala.password': openldap_env['ldap_impala_password'],
+                'ldap.server': ','.join(['{}:{}'.format(server, port) for server in servers]),
+                'ldap.domain.name': openldap_conf['ldap_domain_name'],
+                'ldap.domain.suffix': openldap_conf['ldap_domain_suffix'],
+                'ldap.common.name': openldap_conf['ldap_common_name'],
+                'ldap.admin.password': openldap_conf['ldap_admin_password'],
+                'ldap.impala.user': openldap_conf['ldap_impala_user'],
+                'ldap.impala.password': openldap_conf['ldap_impala_password'],
             })
-        else:
+
+        if 'REDIS' in services_component_dict:
+            redis_conf = self.getServicesSiteProperties(services, 'redis-conf-pub')
             xinsight_env_dict.update({
-                'ldap.enable': 'false',
+                'redis.server': '{}:{}'.format(redis_conf['redis_vip'], redis_conf['redis_port']),
+            })
+
+        if 'REDISCLS' in services_component_dict:
+            servers = services_component_dict['REDISCLS']['REDISCLS_SERVER']
+            ports = self.getServicesSiteProperties(services, 'rediscls-conf-pub')['rediscls_port']
+            xinsight_env_dict.update({
+                'redis.cluster.server': ','.join([','.join(['{}:{}'.format(server, port) for port in ports])
+                                                  for server in servers]),
+            })
+
+        if 'RDS' in services_component_dict:
+            rds_conf = self.getServicesSiteProperties(services, 'rds-conf-pub')
+            xinsight_env_dict.update({
+                'postgres.server': '{}:{}'.format(rds_conf['rds_xinsight_meta_write_vip'],
+                                                  rds_conf['rds_xinsight_meta_port']),
+                'postgres.user': rds_conf['rds_xinsight_meta_user'],
+                'postgres.password': rds_conf['rds_xinsight_meta_password'],
+            })
+
+        if 'TSDB' in services_component_dict:
+            tsdb_conf = self.getServicesSiteProperties(services, 'tsdb-conf-pub')
+            xinsight_env_dict.update({
+                'tsdb.gateway.port': tsdb_conf['tsdb_gateway_port'],
+                'tsdb.gateway.subscribe.port': tsdb_conf['tsdb_gateway_subscribe_port'],
+            })
+
+        if 'RGS' in services_component_dict:
+            rgs_conf = self.getServicesSiteProperties(services, 'rgs-conf-pub')
+            xinsight_env_dict.update({
+                'rgs.meta.topic': rgs_conf['rgs_meta_topic'],
             })
 
         xinsight_env_info = '\n'.join(['{}={}'.format(key, xinsight_env_dict[key])
@@ -556,4 +620,4 @@ if __name__ == '__main__':
     locale.setlocale(locale.LC_ALL, '')
     locale.getlocale(locale.LC_ALL)
     Logger.initialize_logger('test', logging_level='INFO')
-    print(Cdh({}, ['168.2.6.171', '168.2.6.172']))
+    print(Cdh({}, ['168.2.6.179', '168.2.6.172']))

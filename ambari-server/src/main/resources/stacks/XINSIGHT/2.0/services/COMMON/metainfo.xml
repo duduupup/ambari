@@ -13,11 +13,11 @@
             <components>
                 <component>
                     <name>COMMON_CLIENT</name>
-                    <displayName>xinsight common conf</displayName>
+                    <displayName>common client</displayName>
                     <category>CLIENT</category>
                     <cardinality>ALL</cardinality>
                     <commandScript>
-                        <script>scripts/xinsight_client.py</script>
+                        <script>scripts/common_client.py</script>
                         <scriptType>PYTHON</scriptType>
                         <timeout>600</timeout>
                     </commandScript>
