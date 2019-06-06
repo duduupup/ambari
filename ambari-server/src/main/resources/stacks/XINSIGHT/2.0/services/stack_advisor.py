@@ -385,16 +385,12 @@ class XINSIGHT20StackAdvisor(DefaultStackAdvisor):
         return {
             'COMMON': {
                 'common-cdh': self.validateCommonConfigurationsCdh,
-                'common-conf': self.validateCommonConfigurationsConf,
-                'common-env': self.validateCommonConfigurationsEnv,
             },
         }
 
     def recommendCommonConfigurations(self, configurations, clusterSummary, services, hosts):
         Logger.info('##########COMMON getServiceConfigurationRecommendations')
-        common_env = self.getServicesSiteProperties(services, 'common-env')
-        ams_env = self.getServicesSiteProperties(services, 'ams-env')
-        if common_env is not None:
+        if self.getServicesSiteProperties(services, 'common-cdh') is not None:
             cluster_env = self.getServicesSiteProperties(services, "cluster-env")
             xsetup_ini_path = os.path.join(cluster_env['apps_path'], 'xsetup.ini')
             Logger.info('xsetup_ini_path[{}]'.format(xsetup_ini_path))
@@ -407,12 +403,7 @@ class XINSIGHT20StackAdvisor(DefaultStackAdvisor):
             else:
                 xsetup_conf_dict = {}
 
-            if common_env is not None:
-                self.refresh_cdh_configurations(configurations, clusterSummary, services, hosts, xsetup_conf_dict)
-                self.refresh_conf_configurations(configurations, clusterSummary, services, hosts, xsetup_conf_dict)
-                self.refresh_env_configurations(configurations, clusterSummary, services, hosts)
-            else:
-                self.refresh_cdh_configurations(configurations, clusterSummary, services, hosts, xsetup_conf_dict)
+            self.refresh_cdh_configurations(configurations, clusterSummary, services, hosts, xsetup_conf_dict)
             Logger.info('configurations[{}]'.format(configurations))
 
     def refresh_cdh_configurations(self, configurations, clusterSummary, services, hosts, xsetup_conf_dict):
@@ -445,108 +436,6 @@ class XINSIGHT20StackAdvisor(DefaultStackAdvisor):
         cdh_env_info = '\n'.join(['{}={}'.format(key, cdh_env_dict[key]) for key in sorted(cdh_env_dict.keys())])
         putCommonCdhProperty('cdh_env', cdh_env_info)
 
-    def refresh_conf_configurations(self, configurations, clusterSummary, services, hosts, xsetup_conf_dict):
-        xinsight_env_dict = {
-            'glusterfs.volume.directory': xsetup_conf_dict.get('glusterfs.volume.directory', ''),
-            'glusterfs.share.mnt.point': xsetup_conf_dict.get('glusterfs.share.mnt.point', ''),
-            'postgres.data.directory': xsetup_conf_dict.get('postgres.data.directory', ''),
-            'postgres.write.vip': xsetup_conf_dict.get('postgres.write.vip', ''),
-            'postgres.read.vip': xsetup_conf_dict.get('postgres.read.vip', ''),
-            'redis.vip': xsetup_conf_dict.get('redis.vip', ''),
-            'ha.proxy.vip': xsetup_conf_dict.get('ha.proxy.vip', ''),
-        }
-        # generate configurations
-        putCommonConfProperty = self.putProperty(configurations, 'common-conf', services)
-        xinsight_conf_info = '\n'.join(['{}={}'.format(key, xinsight_env_dict[key])
-                                       for key in sorted(xinsight_env_dict.keys())])
-        putCommonConfProperty('xinsight_conf', xinsight_conf_info)
-
-    def refresh_env_configurations(self, configurations, clusterSummary, services, hosts):
-        services_component_dict = self.get_service_component_dict(services, hosts)
-        Logger.info('##########services_component_dict[{}]'.format(json.dumps(services_component_dict)))
-        # generate configurations
-        putCommonEnvProperty = self.putProperty(configurations, "common-env", services)
-        xinsight_env_dict = {
-            'nginx.server': '',
-            'haproxy.vip': '',
-            'ldap.enable': 'false',
-            'redis.server': '',
-            'redis.cluster.server': '',
-        }
-        if 'NGINX' in services_component_dict:
-            servers = services_component_dict['NGINX']['NGINX_SERVER']
-            port = self.getServicesSiteProperties(services, 'nginx-conf-pub')['nginx_port']
-            xinsight_env_dict.update({
-                'nginx.server': ','.join(['{}:{}'.format(server, port) for server in servers]),
-            })
-
-        if 'HAPROXY' in services_component_dict:
-            ha_proxy_conf = self.getServicesSiteProperties(services, 'haproxy-conf-pub')
-            xinsight_env_dict.update({
-                'haproxy.vip': ha_proxy_conf['haproxy_vip'],
-                'haproxy.impala.port': ha_proxy_conf['haproxy_impala_port'],
-                'haproxy.ldap.port': ha_proxy_conf['haproxy_ldap_port'],
-                'haproxy.pds.gateway.port': ha_proxy_conf['haproxy_pds_gateway_port'],
-                'haproxy.tsdb.proxy.port': ha_proxy_conf['haproxy_tsdb_proxy_port'],
-                'haproxy.tsdb.gateway.port': ha_proxy_conf['haproxy_tsdb_gateway_port'],
-                'haproxy.tsdb.gateway.subscribe.port': ha_proxy_conf['haproxy_tsdb_gateway_subscribe_port'],
-            })
-
-        if 'OPENLDAP' in services_component_dict:
-            servers = services_component_dict['OPENLDAP']['OPENLDAP_SERVER']
-            openldap_conf = self.getServicesSiteProperties(services, 'openldap-conf-pub')
-            port = openldap_conf['openldap_port']
-            xinsight_env_dict.update({
-                'ldap.enable': 'true',
-                'ldap.server': ','.join(['{}:{}'.format(server, port) for server in servers]),
-                'ldap.domain.name': openldap_conf['ldap_domain_name'],
-                'ldap.domain.suffix': openldap_conf['ldap_domain_suffix'],
-                'ldap.common.name': openldap_conf['ldap_common_name'],
-                'ldap.admin.password': openldap_conf['ldap_admin_password'],
-                'ldap.impala.user': openldap_conf['ldap_impala_user'],
-                'ldap.impala.password': openldap_conf['ldap_impala_password'],
-            })
-
-        if 'REDIS' in services_component_dict:
-            redis_conf = self.getServicesSiteProperties(services, 'redis-conf-pub')
-            xinsight_env_dict.update({
-                'redis.server': '{}:{}'.format(redis_conf['redis_vip'], redis_conf['redis_port']),
-            })
-
-        if 'REDISCLS' in services_component_dict:
-            servers = services_component_dict['REDISCLS']['REDISCLS_SERVER']
-            ports = self.getServicesSiteProperties(services, 'rediscls-conf-pub')['rediscls_port']
-            xinsight_env_dict.update({
-                'redis.cluster.server': ','.join([','.join(['{}:{}'.format(server, port) for port in ports])
-                                                  for server in servers]),
-            })
-
-        if 'RDS' in services_component_dict:
-            rds_conf = self.getServicesSiteProperties(services, 'rds-conf-pub')
-            xinsight_env_dict.update({
-                'postgres.server': '{}:{}'.format(rds_conf['rds_xinsight_meta_write_vip'],
-                                                  rds_conf['rds_xinsight_meta_port']),
-                'postgres.user': rds_conf['rds_xinsight_meta_user'],
-                'postgres.password': rds_conf['rds_xinsight_meta_password'],
-            })
-
-        if 'TSDB' in services_component_dict:
-            tsdb_conf = self.getServicesSiteProperties(services, 'tsdb-conf-pub')
-            xinsight_env_dict.update({
-                'tsdb.gateway.port': tsdb_conf['tsdb_gateway_port'],
-                'tsdb.gateway.subscribe.port': tsdb_conf['tsdb_gateway_subscribe_port'],
-            })
-
-        if 'RGS' in services_component_dict:
-            rgs_conf = self.getServicesSiteProperties(services, 'rgs-conf-pub')
-            xinsight_env_dict.update({
-                'rgs.meta.topic': rgs_conf['rgs_meta_topic'],
-            })
-
-        xinsight_env_info = '\n'.join(['{}={}'.format(key, xinsight_env_dict[key])
-                                       for key in sorted(xinsight_env_dict.keys())])
-        putCommonEnvProperty('xinsight_env', xinsight_env_info)
-
     def validateCommonConfigurationsCdh(self, siteProperties, siteRecommendations, configurations, services, hosts):
         Logger.info('##########siteProperties(common-cdh)[{}]'.format(siteProperties))
         recommended_cdh_env = siteRecommendations.get('cdh_env', None)
@@ -569,50 +458,6 @@ class XINSIGHT20StackAdvisor(DefaultStackAdvisor):
 
         return self.toConfigurationValidationProblems(
             validationItems, "common-cdh") if len(validationItems) != 0 else []
-
-    def validateCommonConfigurationsConf(self, siteProperties, siteRecommendations, configurations, services, hosts):
-        Logger.info('##########siteProperties(common-conf)[{}]'.format(siteProperties))
-        recommended_xinsight_conf = siteRecommendations.get('xinsight_conf', None)
-        configurations_xinsight_conf = siteProperties.get('xinsight_conf', None)
-
-        validationItems = []
-        if recommended_xinsight_conf is None or configurations_xinsight_conf is None:
-            item = self.getErrorItem('must set XINSIGHT Configuration.')
-            validationItems.extend([{'config-name': 'xinsight_conf', 'item': item}])
-        else:
-            recommended_xinsight_conf_dict = properties2dict(recommended_xinsight_conf)
-            configurations_xinsight_conf_dict = properties2dict(configurations_xinsight_conf)
-            xinsight_conf_dict = dict(recommended_xinsight_conf_dict)
-            xinsight_conf_dict.update(configurations_xinsight_conf_dict)
-            if '' in xinsight_conf_dict.values():
-                item = self.getErrorItem('must set [{}] in XINSIGHT Configuration'.format(
-                    ','.join(recommended_xinsight_conf_dict.keys())))
-                validationItems.extend([{"config-name": "xinsight_conf", "item": item}])
-
-        return self.toConfigurationValidationProblems(
-            validationItems, "common-conf") if len(validationItems) != 0 else []
-
-    def validateCommonConfigurationsEnv(self, siteProperties, siteRecommendations, configurations, services, hosts):
-        Logger.info('##########siteProperties(common-env)[{}]'.format(siteProperties))
-        recommended_xinsight_env = siteRecommendations.get('xinsight_env', None)
-        configurations_xinsight_env = siteProperties.get('xinsight_env', None)
-
-        validationItems = []
-        if recommended_xinsight_env is None:
-            item = self.getErrorItem("some thing wrong happened when get xinsight_env.")
-            validationItems.extend([{"config-name": "xinsight_env", "item": item}])
-        elif configurations_xinsight_env != recommended_xinsight_env:
-            recommended_xinsight_env_dict = properties2dict(recommended_xinsight_env)
-            configurations_xinsight_env_dict = {} if configurations_xinsight_env is None else properties2dict(
-                configurations_xinsight_env)
-            if recommended_xinsight_env_dict != configurations_xinsight_env_dict:
-                item = self.getErrorItem('xinsight_env must use the recommended value.')
-                validationItems.extend([{'config-name': 'xinsight_env', 'item': item}])
-            else:
-                Logger.warning('recommended_xinsight_env is approximately equal to configurations_xinsight_env')
-
-        return self.toConfigurationValidationProblems(
-            validationItems, "common-env") if len(validationItems) != 0 else []
 
 
 if __name__ == '__main__':

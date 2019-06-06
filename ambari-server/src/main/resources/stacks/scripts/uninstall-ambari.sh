@@ -51,7 +51,7 @@ uninstall_ambari_metrics()
 
 uninstall_ambari_server()
 {
-    kill_processes ambari-server
+    #kill_processes ambari-server
     remove_packages ambari-server
     clear_files ambari-server
 }
