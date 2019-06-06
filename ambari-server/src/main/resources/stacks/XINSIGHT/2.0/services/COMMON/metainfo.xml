@@ -52,7 +52,6 @@
             <configuration-dependencies>
                 <config-type>common-cdh</config-type>
                 <config-type>common-conf</config-type>
-                <config-type>common-env</config-type>
             </configuration-dependencies>
         </service>
     </services>

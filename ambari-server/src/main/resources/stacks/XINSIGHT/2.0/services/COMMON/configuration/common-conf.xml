@@ -2,14 +2,4 @@
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <configuration support_final="true">
 
-    <property>
-        <name>xinsight_conf</name>
-        <display-name>XINSIGHT Configuration</display-name>
-        <value><![CDATA[
-]]></value>
-        <value-attributes>
-            <type>content</type>
-        </value-attributes>
-    </property>
-
 </configuration>

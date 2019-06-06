@@ -1,5 +1,5 @@
 from resource_management import *
-from resource_management.libraries.functions.format import format
+from resource_management.libraries.functions import default, format
 from ambari_commons.constants import AMBARI_SUDO_BINARY
 
 config = Script.get_config()
