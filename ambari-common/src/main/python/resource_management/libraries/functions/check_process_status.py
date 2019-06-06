@@ -43,22 +43,23 @@ def check_process_status(pid_file):
     raise ComponentIsNotRunning()
   
   try:
-    pid = int(sudo.read_file(pid_file))
+    pids = [int(pid) for pid in sudo.read_file(pid_file).strip().split('\n') if pid != '']
   except:
     Logger.info("Pid file {0} does not exist or does not contain a process id number".format(pid_file))
     raise ComponentIsNotRunning()
 
-  try:
-    # Kill will not actually kill the process
-    # From the doc:
-    # If sig is 0, then no signal is sent, but error checking is still
-    # performed; this can be used to check for the existence of a
-    # process ID or process group ID.
-    sudo.kill(pid, 0)
-  except OSError:
-    Logger.info("Process with pid {0} is not running. Stale pid file"
-              " at {1}".format(pid, pid_file))
-    raise ComponentIsNotRunning()
+  for pid in pids:
+    try:
+      # Kill will not actually kill the process
+      # From the doc:
+      # If sig is 0, then no signal is sent, but error checking is still
+      # performed; this can be used to check for the existence of a
+      # process ID or process group ID.
+      sudo.kill(pid, 0)
+    except OSError:
+      Logger.info("Process with pid {0} is not running. Stale pid file"
+                " at {1}".format(pid, pid_file))
+      raise ComponentIsNotRunning()
 
 
 def wait_process_stopped(pid_file):
