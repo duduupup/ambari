@@ -34,11 +34,6 @@
                             <fileName>common-conf.xml</fileName>
                             <dictionaryName>common-conf</dictionaryName>
                         </configFile>
-                        <configFile>
-                            <type>xml</type>
-                            <fileName>common-env.xml</fileName>
-                            <dictionaryName>common-env</dictionaryName>
-                        </configFile>
                     </configFiles>
                 </component>
             </components>

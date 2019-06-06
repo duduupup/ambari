@@ -21,9 +21,9 @@ def common_configure():
     basic_xinsight_properties_content = _xinsight_properties_content(common_configuration_dict)
     custom_xinsight_properties_content = '\n'.join([
         'key=value' for key, value in params.config['configurations']['common-conf']
-        if key not in common_configuration_dict
+        if key not in common_configuration_dict and key != 'xinsight_env'
     ])
-    xinsight_properties_content = '%s\n# others\n%s\n' % (
+    xinsight_properties_content = '%s\n\n# others\n%s\n' % (
         basic_xinsight_properties_content, custom_xinsight_properties_content)
     File(format("{common_conf_dir}/xinsight.properties"), content=xinsight_properties_content, mode=0644,
          owner=params.common_user, group=params.common_group)

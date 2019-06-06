@@ -2,4 +2,44 @@
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <configuration support_final="true">
 
+    <property>
+        <name>xinsight_env</name>
+        <display-name>XINSIGHT Environment</display-name>
+        <value><![CDATA[
+]]></value>
+        <value-attributes>
+            <type>content</type>
+            <visible>false</visible>
+        </value-attributes>
+        <depends-on>
+            <property>
+                <type>redis-conf-pub</type>
+            </property>
+            <property>
+                <type>rediscls-conf-pub</type>
+            </property>
+            <property>
+                <type>rds-conf-pub</type>
+            </property>
+            <property>
+                <type>pds-conf-pub</type>
+            </property>
+            <property>
+                <type>tsdb-conf-pub</type>
+            </property>
+            <property>
+                <type>rgs-conf-pub</type>
+            </property>
+            <property>
+                <type>openldap-conf-pub</type>
+            </property>
+            <property>
+                <type>nginx-conf-pub</type>
+            </property>
+            <property>
+                <type>haproxy-conf-pub</type>
+            </property>
+        </depends-on>
+    </property>
+
 </configuration>
