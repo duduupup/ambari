@@ -1,3 +1,4 @@
+# coding=utf-8
 from resource_management import *
 from resource_management.libraries.functions import default, format
 from ambari_commons.constants import AMBARI_SUDO_BINARY

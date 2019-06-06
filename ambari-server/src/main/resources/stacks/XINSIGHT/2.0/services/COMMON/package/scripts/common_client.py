@@ -1,3 +1,4 @@
+# coding=utf-8
 import common
 from resource_management import *
 
