@@ -1,8 +1,17 @@
 import ConfigParser
 import StringIO
+import os
 from xml.etree import ElementTree
 
 MyConfigParser = type('MyConfigParser', (ConfigParser.RawConfigParser, object), {'optionxform': lambda self, x: x})
+
+
+def config_file_content(config_file):
+    if os.path.exists(config_file):
+        with open(config_file, 'r') as f:
+            return f.read().strip()
+    else:
+        return ''
 
 
 def properties2dict(config_content):
