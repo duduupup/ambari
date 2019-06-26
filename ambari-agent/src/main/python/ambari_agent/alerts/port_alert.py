@@ -173,6 +173,7 @@ class PortAlert(BaseAlert):
 
         return (result, [seconds, port])
       except Exception as e:
+        logger.warning('%s:%s' % (host, port))
         logger.warning(str(e))
         exceptions.append('test {}:{} failed'.format(host, port))
       finally:
