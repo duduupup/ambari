@@ -79,7 +79,7 @@
     </property>
     <property>
         <name>stack_root</name>
-        <value>{"XINSIGHT":"/apps"}</value>
+        <value>{"XINSIGHT":"/apps/xinsight"}</value>
         <description>JSON which defines the stack root by stack name</description>
         <value-attributes>
             <read-only>true</read-only>
@@ -113,42 +113,6 @@
             <overridable>false</overridable>
         </value-attributes>
         <on-ambari-upgrade add="true"/>
-    </property>
-
-    <property>
-        <name>apps_path</name>
-        <description>xinsight_path is the location of the root directory of the xinsight product.</description>
-        <display-name>xInsight Path</display-name>
-        <value>/apps</value>
-        <value-attributes>
-            <type>directory</type>
-            <overridable>false</overridable>
-            <editable-only-at-install>true</editable-only-at-install>
-        </value-attributes>
-    </property>
-
-    <property>
-        <name>xinsight_path</name>
-        <description>xinsight_path is the location of the root directory of the xinsight product.</description>
-        <display-name>xInsight Path</display-name>
-        <value>/apps/xinsight</value>
-        <value-attributes>
-            <type>directory</type>
-            <overridable>false</overridable>
-            <editable-only-at-install>true</editable-only-at-install>
-        </value-attributes>
-    </property>
-
-    <property>
-        <name>xsetup_path</name>
-        <description>xsetup_path is the location of xsetup packages.</description>
-        <display-name>Xsetup Path</display-name>
-        <value>/xsetup</value>
-        <value-attributes>
-            <type>directory</type>
-            <overridable>false</overridable>
-            <editable-only-at-install>true</editable-only-at-install>
-        </value-attributes>
     </property>
 
     <property>
